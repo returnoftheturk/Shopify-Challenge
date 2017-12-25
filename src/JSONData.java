@@ -6,18 +6,22 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class JSONData {
+	String JSONData;
 	public JSONData() {
+		
 		
 	}
 	
-	public static void main (String args[])  {
+	public void main (String args[])  {
 		try {
-			getJSON();
+			JSONData = getJSON();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
+	
+	
 	
 	public static String getJSON() throws IOException {
 		StringBuilder result = new StringBuilder();
@@ -34,4 +38,6 @@ public class JSONData {
 		System.out.println(result.toString());
 		return result.toString();
 	}
+	
+	
 }
