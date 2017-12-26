@@ -16,18 +16,8 @@ public class JSONData {
 	public JSONData() {		}
 	
 	public static void main (String args[]) throws ParseException, IOException  {
-//		JSONData = getJSON();
-//		
-//		JSONParser jsonParser = new JSONParser();
-//		JSONObject json = (JSONObject)jsonParser.parse(JSONData);
-//
-//		JSONArray menuArray = (JSONArray) json.get("menus");
-//		checkDependency(menuArray);
-		System.out.println(getFullJSON().replace("][", ","));
-//		for (Object o: menuArray) {
-//			checkDependency((JSONObject)o);
-//		}
-//		System.out.print(findJSONObject(menuArray, 6));
+		JSONData = getFullJSON();
+		System.out.println(JSONData);
 	}
 	
 	public static int checkDependency(JSONArray jsonArray) {
@@ -35,18 +25,9 @@ public class JSONData {
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 			JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
 			System.out.println(Arrays.toString(JSONArraytoIntArray(jsonA)));
-//			jsonA.add(jsonObject);
+
 		}
 		
-		for (Object o: jsonArray) {
-			int count = 0;
-			int id = Integer.valueOf(((JSONObject) o).get("id").toString());
-//			int[] child_ids = ((JSONObject)o).getJSONArray("child_ids");
-//			System.out.println(((JSONObject)o).get("child_ids"));
-//			System.out.println(o.toString());
-			
-		}
-//		int id = Integer.valueOf(o.get("id").toString());
 		return -1;
 	}
 	
@@ -94,12 +75,13 @@ public class JSONData {
 		return menuArray.toString();
 	}
 	
+	//Iterate through API to get all the pages
 	public static String getFullJSON() throws IOException, ParseException {
 		String fullJSON =  "";
 		for (int i=1; i<4; i++) {
 			fullJSON+=getJSON(i);
 		}
-		
+		fullJSON.replace("][", ",");
 		return fullJSON;
 	}
 }
