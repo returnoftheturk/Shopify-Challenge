@@ -34,13 +34,26 @@ public class JSONData {
 		for (Object o: menuArray) {
 			checkDependency((JSONObject)o);
 		}
+		System.out.print(findJSONObject(menuArray, 6));
 	}
 	
 	public static int checkDependency(JSONObject o) {
 		System.out.println(o.toString());
+		
 		return -1;
 	}
 	
+	public static int findJSONObject(JSONArray jsonArray, int id) {
+		int i = 0;
+		for (Object o: jsonArray) {
+			if (Integer.valueOf(((JSONObject)o).get("id").toString())==id) {
+				return i;
+			}
+			i++;
+				
+		}
+		return -1;
+	}
 	
 	public static String getJSON() throws IOException {
 		StringBuilder result = new StringBuilder();
