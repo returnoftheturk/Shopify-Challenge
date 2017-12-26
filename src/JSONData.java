@@ -5,6 +5,7 @@ import java.net.HttpURLConnection;
 
 import java.net.URL;
 
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -28,12 +29,17 @@ public class JSONData {
 		
 		System.out.println(json.toString());
 
-		
-//		Gson g = new Gson();
-//		Menu[] menu = g.fromJson(JSONData, Menu[].class);
-//		System.out.println(g.toJson(menu));
+		JSONArray menuArray = (JSONArray) json.get("menus");
+		System.out.println(menuArray.toString());
+		for (Object o: menuArray) {
+			checkDependency((JSONObject)o);
+		}
 	}
 	
+	public static int checkDependency(JSONObject o) {
+		System.out.println(o.toString());
+		return -1;
+	}
 	
 	
 	public static String getJSON() throws IOException {
