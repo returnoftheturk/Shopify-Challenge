@@ -5,20 +5,33 @@ import java.net.HttpURLConnection;
 
 import java.net.URL;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import com.google.gson.Gson;
+
+
 public class JSONData {
-	String JSONData;
+	static String JSONData;
 	public JSONData() {
 		
 		
 	}
 	
-	public void main (String args[])  {
-		try {
-			JSONData = getJSON();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public static void main (String args[]) throws ParseException, IOException  {
+		
+		JSONData = getJSON();
+		
+		JSONParser jsonParser = new JSONParser();
+		JSONObject json = (JSONObject)jsonParser.parse(JSONData);
+		
+		System.out.println(json.toString());
+
+		
+//		Gson g = new Gson();
+//		Menu[] menu = g.fromJson(JSONData, Menu[].class);
+//		System.out.println(g.toJson(menu));
 	}
 	
 	
