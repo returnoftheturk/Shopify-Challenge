@@ -16,14 +16,14 @@ public class JSONData {
 	public JSONData() {		}
 	
 	public static void main (String args[]) throws ParseException, IOException  {
-		JSONData = getJSON();
-		
-		JSONParser jsonParser = new JSONParser();
-		JSONObject json = (JSONObject)jsonParser.parse(JSONData);
-
-		JSONArray menuArray = (JSONArray) json.get("menus");
-		checkDependency(menuArray);
-		System.out.println(menuArray.toString());
+//		JSONData = getJSON();
+//		
+//		JSONParser jsonParser = new JSONParser();
+//		JSONObject json = (JSONObject)jsonParser.parse(JSONData);
+//
+//		JSONArray menuArray = (JSONArray) json.get("menus");
+//		checkDependency(menuArray);
+		System.out.println(getFullJSON().replace("][", ","));
 //		for (Object o: menuArray) {
 //			checkDependency((JSONObject)o);
 //		}
@@ -35,7 +35,7 @@ public class JSONData {
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 			JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
 			System.out.println(Arrays.toString(JSONArraytoIntArray(jsonA)));
-			
+//			jsonA.add(jsonObject);
 		}
 		
 		for (Object o: jsonArray) {
@@ -72,10 +72,10 @@ public class JSONData {
 		return -1;
 	}
 	
-	public static String getJSON() throws IOException {
+	public static String getJSON(int pageNum) throws IOException, ParseException {
 		StringBuilder result = new StringBuilder();
-						
-		URL url = new URL("https://backend-challenge-summer-2018.herokuapp.com/challenges.json?id=1&page=1");
+		
+		URL url = new URL("https://backend-challenge-summer-2018.herokuapp.com/challenges.json?id=1&page="+pageNum);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -83,8 +83,23 @@ public class JSONData {
 		while((line=rd.readLine())!=null) {
 			result.append(line);
 		}
-		rd.close();
-		return result.toString();
+		JSONParser jsonParser = new JSONParser();
+		JSONObject json = (JSONObject)jsonParser.parse(result.toString());
+		
+		JSONArray menuArray = (JSONArray) json.get("menus");
+		System.out.println(menuArray.toString());
+		
+		rd.close();	
+
+		return menuArray.toString();
 	}
 	
+	public static String getFullJSON() throws IOException, ParseException {
+		String fullJSON =  "";
+		for (int i=1; i<4; i++) {
+			fullJSON+=getJSON(i);
+		}
+		
+		return fullJSON;
+	}
 }
