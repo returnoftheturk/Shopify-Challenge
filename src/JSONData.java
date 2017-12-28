@@ -6,7 +6,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -17,6 +19,7 @@ public class JSONData {
 	static String JSONData;
 	static JSONArray jsonArrayFull;
 	static List<Integer> parent_ids;
+	static List<Boolean> loopControl = new ArrayList<>();
 	static int menuDepth;
 	public JSONData()  {		}
 	
@@ -25,6 +28,10 @@ public class JSONData {
 		System.out.println(JSONData);
 		jsonArrayFull = (JSONArray)new JSONParser().parse(getFullJSON());
 		checkDependency(jsonArrayFull);
+	}
+	
+	public static void addBoolean(boolean bool) {
+		loopControl.add(bool);
 	}
 	
 	public static void initializeVariables() {
@@ -61,10 +68,42 @@ public class JSONData {
 			
 			initializeVariables();
 
-			if (jsonObject.get("parent_id")!=null) {
-				System.out.println("Index: " + i + " " + jsonObject.get("data").toString() + " " + findLoopButtomUp(i));
+			if (jsonObject.get("parent_id")==null) {
+				addBoolean(false);
+//				System.out.println("Index: " + i + " " + jsonObject.get("data").toString() + " " + findLoopButtomUp(i));
+			}else {
+				addBoolean(findLoopButtomUp(i));
 			}
 		}
+		System.out.println(loopControl.toString());
+		System.out.println(createReturnJson(loopControl, jsonArrayFull).toString());
+	}
+	
+	public static JSONObject createReturnJson(List<Boolean> bools, JSONArray jsonArray) {
+		JSONArray toReturnArray = new JSONArray();
+		Map<String, String> toReturnJSON =  new HashMap<String, String>();
+//		JSONObject toReturnJSON = new JSONObject();
+		
+		
+		for(int i=0; i<jsonArray.size(); i++) {
+			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+			
+			if (jsonObject.get("parent_id")!=null) {
+				if(bools.get(i)==true) {
+					toReturnJSON.put("root_id", jsonObject.get("id").toString());			
+//					toReturnArray.add(toReturnJSON);
+					
+					
+				} else {
+					
+					
+				}
+			}
+			
+		}
+		JSONObject jsonCastedO = new JSONObject(toReturnJSON);
+		return jsonCastedO;
+		
 	}
 	
 	public static boolean findLoopButtomUp(int index) {
