@@ -15,12 +15,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import com.google.gson.Gson;
+
 public class JSONData {
 	static String JSONData;
 	static JSONArray jsonArrayFull;
 	static List<Integer> parent_ids;
 	static List<Boolean> loopControl = new ArrayList<>();
 	static int menuDepth;
+	
 	public JSONData()  {		}
 	
 	public static void main (String args[]) throws ParseException, IOException  {
@@ -62,12 +65,27 @@ public class JSONData {
 		
 	}
 	
+	public static void changeRootBoolean() {
+		System.out.println(loopControl.toString());
+		for (int i = 0; i<loopControl.size(); i++) {
+			JSONObject jsonObject = (JSONObject) jsonArrayFull.get(i);
+			
+			while(jsonObject.get("parent_id")!=null){
+				jsonObject = (JSONObject) jsonArrayFull.get(findJSONObject(jsonArrayFull,Integer.valueOf(jsonObject.get("parent_id").toString())));
+			}
+			loopControl.set(findJSONObject(jsonArrayFull,Integer.valueOf(jsonObject.get("id").toString())), loopControl.get(i));
+			
+		}
+		System.out.println(loopControl.toString());
+		
+	}
+
 	public static void checkDependency(JSONArray jsonArray) {
 		for(int i =0; i< jsonArray.size(); i++) {
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 			
 			initializeVariables();
-
+			
 			if (jsonObject.get("parent_id")==null) {
 				addBoolean(false);
 //				System.out.println("Index: " + i + " " + jsonObject.get("data").toString() + " " + findLoopButtomUp(i));
@@ -75,34 +93,43 @@ public class JSONData {
 				addBoolean(findLoopButtomUp(i));
 			}
 		}
-		System.out.println(loopControl.toString());
-		System.out.println(createReturnJson(loopControl, jsonArrayFull).toString());
+		changeRootBoolean();
+		createReturnJson(loopControl, jsonArrayFull).toString();
+//		System.out.println(loopControl.toString());
+//		System.out.println(createReturnJson(loopControl, jsonArrayFull).toString());
 	}
 	
-	public static JSONObject createReturnJson(List<Boolean> bools, JSONArray jsonArray) {
-		JSONArray toReturnArray = new JSONArray();
-		Map<String, String> toReturnJSON =  new HashMap<String, String>();
-//		JSONObject toReturnJSON = new JSONObject();
-		
-		
+	public static JSONArray createReturnJson(List<Boolean> bools, JSONArray jsonArray) {
+		ArrayList<Map<String, String>> toReturnArrayValid = new ArrayList<>();
+		ArrayList<Map<String, String>> toReturnArrayInValid = new ArrayList<>();
 		for(int i=0; i<jsonArray.size(); i++) {
+			Map<String, String> toReturnJSON =  new HashMap<String, String>();
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 			
-			if (jsonObject.get("parent_id")!=null) {
-				if(bools.get(i)==true) {
-					toReturnJSON.put("root_id", jsonObject.get("id").toString());			
-//					toReturnArray.add(toReturnJSON);
-					
+			if (jsonObject.get("parent_id")==null) {
+				toReturnJSON.put("root_id", jsonObject.get("id").toString());
+				
+				if(bools.get(i)==false) {
+						
+//					JSONObject jsonCastedO = new JSONObject(toReturnJSON);
+					toReturnArrayValid.add(toReturnJSON);
+					System.out.println(toReturnJSON.toString());
+					System.out.println(toReturnArrayValid.toString());
 					
 				} else {
-					
+					toReturnArrayInValid.add(toReturnJSON);					
 					
 				}
 			}
 			
 		}
-		JSONObject jsonCastedO = new JSONObject(toReturnJSON);
-		return jsonCastedO;
+		
+		String gsonValid = new Gson().toJson(toReturnArrayValid);
+		String gsonInValid = new Gson().toJson(toReturnArrayInValid);
+		System.out.println("GSON Valid: " + gsonValid);
+		System.out.println("GSON Invalid: " + gsonInValid);
+//		JSONArray castedArray = new JSONArray(toReturnArray);
+		return new JSONArray();
 		
 	}
 	
