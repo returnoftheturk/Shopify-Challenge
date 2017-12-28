@@ -15,51 +15,76 @@ import org.json.simple.parser.ParseException;
 
 public class JSONData {
 	static String JSONData;
-	public JSONData() {		}
+	static JSONArray jsonArrayFull;
+	static List<Integer> parent_ids;
+	static int menuDepth;
+	public JSONData()  {		}
 	
 	public static void main (String args[]) throws ParseException, IOException  {
 		JSONData = getFullJSON();
 		System.out.println(JSONData);
 //		System.out.println(((JSONArray)new JSONParser().parse(JSONData)).toString());
-		checkDependency((JSONArray)new JSONParser().parse(JSONData));
+		jsonArrayFull = (JSONArray)new JSONParser().parse(getFullJSON());
+		checkDependency(jsonArrayFull);
+	}
+	
+	public static void initializeVariables() {
+		parent_ids = new ArrayList<>();
+		menuDepth = 0;
+	}
+	
+	public static void addId(int id) {
+		parent_ids.add(id);
+		menuDepth++;
 	}
 	
 	public static int checkDependency(JSONArray jsonArray) {
 		for(int i =0; i< jsonArray.size(); i++) {
 			
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-			System.out.println(jsonObject.toString());
-			JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
-			System.out.println(jsonObject.get("parent_id")==null);
-			if (jsonObject.get("parent_id")==null) {
-				System.out.println(i);
-			} else {
-				System.out.println(jsonObject.get("parent_id").toString());
-			}
+//			JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
+//			int[] child_ids_int = JSONArraytoIntArray(jsonA);
+			
 			int id = Integer.valueOf(jsonObject.get("id").toString());
-			List<Integer> parent_ids = new ArrayList<>();
-			parent_ids.add(id);
 			
-			int[] child_ids_int = JSONArraytoIntArray(jsonA);
+			initializeVariables();
+			addId(id);
 			
-			System.out.println(Arrays.toString(JSONArraytoIntArray(jsonA)));
-			for (int j=0; j<child_ids_int.length; j++) {
-				int childIndex = findJSONObject(jsonArray, child_ids_int[j]);
-				findLoop((JSONObject)jsonArray.get(childIndex), parent_ids);
-				
-				
+			
+			if (jsonObject.get("parent_id")==null) {
+				System.out.println(findLoop(i));
+//				System.out.println("PARENT");
+//				System.out.println(jsonObject.get("data").toString());
+//				System.out.println(i);
+			} else {
+//				System.out.println("CHILD OF GOD");
+//				System.out.println(jsonObject.get("data").toString());
+//				System.out.println(jsonObject.get("parent_id").toString());
 			}
+			
 		}
 		
 		return -1;
 	}
 	
-	public static int findLoop(JSONObject jsonChild, List<Integer> parent_ids) {
-		int [] child_ids_int = JSONArraytoIntArray((JSONArray)jsonChild.get("child_ids"));
-		
-		
-		
-		return -1;
+	public static boolean findLoop(int index) {
+		JSONObject jsonObject = (JSONObject) jsonArrayFull.get(index);
+		JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
+		if (menuDepth>4||parent_ids.contains(jsonArrayFull.get(index))) {
+			return true;
+		} else if (jsonA==null) {
+			return false;
+		} else {
+			int [] child_ids_int = JSONArraytoIntArray(jsonA);
+			for(int i=0; i<child_ids_int.length; i++) {
+				System.out.println(child_ids_int[i]);
+//				System.out.println(findLoop(findJSONObject(jsonArrayFull, child_ids_int[i])));
+				addId(child_ids_int[i]);
+				return findLoop(findJSONObject(jsonArrayFull, child_ids_int[i]));
+				
+			}
+		}
+		return false;	
 	}
 	
 	//Use to convert the child_ids value into a int[] array.
