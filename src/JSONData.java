@@ -4,7 +4,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -18,15 +20,44 @@ public class JSONData {
 	public static void main (String args[]) throws ParseException, IOException  {
 		JSONData = getFullJSON();
 		System.out.println(JSONData);
+//		System.out.println(((JSONArray)new JSONParser().parse(JSONData)).toString());
+		checkDependency((JSONArray)new JSONParser().parse(JSONData));
 	}
 	
 	public static int checkDependency(JSONArray jsonArray) {
 		for(int i =0; i< jsonArray.size(); i++) {
+			
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+			System.out.println(jsonObject.toString());
 			JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
+			System.out.println(jsonObject.get("parent_id")==null);
+			if (jsonObject.get("parent_id")==null) {
+				System.out.println(i);
+			} else {
+				System.out.println(jsonObject.get("parent_id").toString());
+			}
+			int id = Integer.valueOf(jsonObject.get("id").toString());
+			List<Integer> parent_ids = new ArrayList<>();
+			parent_ids.add(id);
+			
+			int[] child_ids_int = JSONArraytoIntArray(jsonA);
+			
 			System.out.println(Arrays.toString(JSONArraytoIntArray(jsonA)));
-
+			for (int j=0; j<child_ids_int.length; j++) {
+				int childIndex = findJSONObject(jsonArray, child_ids_int[j]);
+				findLoop((JSONObject)jsonArray.get(childIndex), parent_ids);
+				
+				
+			}
 		}
+		
+		return -1;
+	}
+	
+	public static int findLoop(JSONObject jsonChild, List<Integer> parent_ids) {
+		int [] child_ids_int = JSONArraytoIntArray((JSONArray)jsonChild.get("child_ids"));
+		
+		
 		
 		return -1;
 	}
@@ -43,12 +74,13 @@ public class JSONData {
 	
 	//Returns index where JSONObject is located in the array if it exists, -1 if it doesnt exist.
 	public static int findJSONObject(JSONArray jsonArray, int id) {
-		int i = 0;
-		for (Object o: jsonArray) {
-			if (Integer.valueOf(((JSONObject)o).get("id").toString())==id) {
+		for (int i = 0; i<jsonArray.size(); i++) {
+			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+						
+			if (Integer.valueOf(jsonObject.get("id").toString())==id) {
 				return i;
 			}
-			i++;
+			
 		}
 		return -1;
 	}
@@ -68,7 +100,7 @@ public class JSONData {
 		JSONObject json = (JSONObject)jsonParser.parse(result.toString());
 		
 		JSONArray menuArray = (JSONArray) json.get("menus");
-		System.out.println(menuArray.toString());
+//		System.out.println(menuArray.toString());
 		
 		rd.close();	
 
@@ -81,7 +113,7 @@ public class JSONData {
 		for (int i=1; i<4; i++) {
 			fullJSON+=getJSON(i);
 		}
-		fullJSON.replace("][", ",");
+		fullJSON = fullJSON.replace("][", ",");
 		return fullJSON;
 	}
 }
