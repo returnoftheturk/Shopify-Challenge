@@ -16,6 +16,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public class JSONData {
 	static String JSONData;
@@ -66,7 +68,7 @@ public class JSONData {
 	}
 	
 	public static void changeRootBoolean() {
-		System.out.println(loopControl.toString());
+//		System.out.println(loopControl.toString());
 		for (int i = 0; i<loopControl.size(); i++) {
 			JSONObject jsonObject = (JSONObject) jsonArrayFull.get(i);
 			
@@ -76,7 +78,7 @@ public class JSONData {
 			loopControl.set(findJSONObject(jsonArrayFull,Integer.valueOf(jsonObject.get("id").toString())), loopControl.get(i));
 			
 		}
-		System.out.println(loopControl.toString());
+//		System.out.println(loopControl.toString());
 		
 	}
 
@@ -95,44 +97,71 @@ public class JSONData {
 		}
 		changeRootBoolean();
 		createReturnJson(loopControl, jsonArrayFull).toString();
+		
 //		System.out.println(loopControl.toString());
 //		System.out.println(createReturnJson(loopControl, jsonArrayFull).toString());
 	}
 	
+	
 	public static JSONArray createReturnJson(List<Boolean> bools, JSONArray jsonArray) {
-		ArrayList<Map<String, String>> toReturnArrayValid = new ArrayList<>();
-		ArrayList<Map<String, String>> toReturnArrayInValid = new ArrayList<>();
+//		ArrayList<Map<String, String>> toReturnArrayValid = new ArrayList<>();
+//		ArrayList<Map<String, String>> toReturnArrayInValid = new ArrayList<>();
+		JsonArray toReturnArrayValidJson = new JsonArray();
+		JsonArray toReturnArrayInValidJson = new JsonArray();
 		for(int i=0; i<jsonArray.size(); i++) {
-			Map<String, String> toReturnJSON =  new HashMap<String, String>();
+//			Map<String, String> toReturnJSON =  new HashMap<String, String>();
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 			
 			if (jsonObject.get("parent_id")==null) {
-				toReturnJSON.put("root_id", jsonObject.get("id").toString());
+				JsonObject testing = new JsonObject();
+				testing.addProperty("children", getChildrenArray(Integer.valueOf(jsonObject.get("id").toString())));
+				testing.addProperty("root_id", jsonObject.get("id").toString());
+//				toReturnJSON.put("children", getChildrenArray(Integer.valueOf(jsonObject.get("id").toString())));
+//				toReturnJSON.put("root_id", jsonObject.get("id").toString());
+				
 				
 				if(bools.get(i)==false) {
 						
 //					JSONObject jsonCastedO = new JSONObject(toReturnJSON);
-					toReturnArrayValid.add(toReturnJSON);
-					System.out.println(toReturnJSON.toString());
-					System.out.println(toReturnArrayValid.toString());
+					toReturnArrayValidJson.add(testing);
+//					toReturnArrayValid.add(toReturnJSON);
+//					System.out.println(toReturnJSON.toString());
+//					System.out.println("TESTING: " + toReturnArrayValidJson.toString());
 					
 				} else {
-					toReturnArrayInValid.add(toReturnJSON);					
+//					toReturnArrayInValid.add(toReturnJSON);	
+					toReturnArrayInValidJson.add(testing);
 					
 				}
 			}
 			
 		}
 		
-		String gsonValid = new Gson().toJson(toReturnArrayValid);
-		String gsonInValid = new Gson().toJson(toReturnArrayInValid);
-		System.out.println("GSON Valid: " + gsonValid);
-		System.out.println("GSON Invalid: " + gsonInValid);
+//		String gsonValid = new Gson().toJson(toReturnArrayValid);
+//		String gsonInValid = new Gson().toJson(toReturnArrayInValid);
+//		Gson gsonFull = new Gson();
+		Map<String, JsonArray> jsonFull = new HashMap<String, JsonArray>();
+		jsonFull.put("invalid_menus", toReturnArrayValidJson);
+		jsonFull.put("valid_menus", toReturnArrayInValidJson);
+		
+		
+		JSONObject jsonFullCasted = new JSONObject(jsonFull);
+		
+		
+		
+//		System.out.println("GSON Valid: " + gsonValid);
+//		System.out.println("GSON Invalid: " + gsonInValid);
 //		JSONArray castedArray = new JSONArray(toReturnArray);
+		System.out.println("CASTED: " + jsonFullCasted.toString());
 		return new JSONArray();
 		
 	}
 	
+	public static String getChildrenArray(int id) {
+		
+		return "[]";
+		
+	}
 	public static boolean findLoopButtomUp(int index) {
 		JSONObject jsonObject = (JSONObject) jsonArrayFull.get(index);
 		int[] child_ids_int = JSONArraytoIntArray((JSONArray)jsonObject.get("child_ids"));
