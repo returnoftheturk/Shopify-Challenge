@@ -34,8 +34,26 @@ public class JSONData {
 	}
 	
 	public static void addId(int id) {
-		parent_ids.add(id);
-		menuDepth++;
+		if(!parent_ids.contains(id)) {
+			parent_ids.add(id);
+			menuDepth++;	
+		}
+		
+	}
+	
+	public static void addIdArray(int [] id) {
+		int added = 0;
+		for (int i=0; i<id.length; i++) {
+			if(!parent_ids.contains(id[i])) {
+				parent_ids.add(id[i]);
+				added++;
+			}
+				
+		}
+		if(added>0) {
+			menuDepth++;	
+		}
+		
 	}
 	
 	public static int checkDependency(JSONArray jsonArray) {
@@ -48,18 +66,12 @@ public class JSONData {
 			int id = Integer.valueOf(jsonObject.get("id").toString());
 			
 			initializeVariables();
-			addId(id);
-			
+//			addId(id);
 			
 			if (jsonObject.get("parent_id")==null) {
-				System.out.println(findLoop(i));
-//				System.out.println("PARENT");
-//				System.out.println(jsonObject.get("data").toString());
-//				System.out.println(i);
+
 			} else {
-//				System.out.println("CHILD OF GOD");
-//				System.out.println(jsonObject.get("data").toString());
-//				System.out.println(jsonObject.get("parent_id").toString());
+				System.out.println("Index: " + i + " " + jsonObject.get("data").toString() + " " + findLoopButtomUp(i));
 			}
 			
 		}
@@ -67,25 +79,49 @@ public class JSONData {
 		return -1;
 	}
 	
-	public static boolean findLoop(int index) {
+	public static boolean findLoopButtomUp(int index) {
 		JSONObject jsonObject = (JSONObject) jsonArrayFull.get(index);
-		JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
-		if (menuDepth>4||parent_ids.contains(jsonArrayFull.get(index))) {
-			return true;
-		} else if (jsonA==null) {
-			return false;
-		} else {
-			int [] child_ids_int = JSONArraytoIntArray(jsonA);
-			for(int i=0; i<child_ids_int.length; i++) {
-				System.out.println(child_ids_int[i]);
-//				System.out.println(findLoop(findJSONObject(jsonArrayFull, child_ids_int[i])));
-				addId(child_ids_int[i]);
-				return findLoop(findJSONObject(jsonArrayFull, child_ids_int[i]));
+		int[] child_ids_int = JSONArraytoIntArray((JSONArray)jsonObject.get("child_ids"));
+		if (child_ids_int.length>0) {
+			addIdArray(child_ids_int);
+		}
 				
+		if(parent_ids.contains(Integer.valueOf(jsonObject.get("id").toString()))) {
+			return true;
+		} else {
+			addId(Integer.valueOf(jsonObject.get("id").toString()));
+			if(jsonObject.get("parent_id")!=null) {
+				int parentJId = Integer.valueOf(jsonObject.get("parent_id").toString());
+				int parentIndex = findJSONObject(jsonArrayFull, parentJId);
+//				addId(parentJId);
+				return findLoopButtomUp(parentIndex);
+			} else {
+				return false;				
 			}
 		}
-		return false;	
 	}
+	
+	public static boolean findLoopTopDown(int index) {
+		JSONObject jsonObject = (JSONObject) jsonArrayFull.get(index);
+		JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
+		if (menuDepth>4||parent_ids.contains(jsonObject.get("id"))) {
+			return true;
+		} else {
+			if (jsonA!=null) {
+				int [] child_ids_int = JSONArraytoIntArray(jsonA);
+				for(int i=0; i<child_ids_int.length; i++) {
+					System.out.println(child_ids_int[i]);
+//					System.out.println(findLoop(findJSONObject(jsonArrayFull, child_ids_int[i])));
+					addId(child_ids_int[i]);
+					return findLoopTopDown(findJSONObject(jsonArrayFull, child_ids_int[i]));
+				}
+			} else {
+				return false;
+			}
+		}
+		return false;
+	}
+	
 	
 	//Use to convert the child_ids value into a int[] array.
 	public static int[] JSONArraytoIntArray(JSONArray jsonArray) {
@@ -113,7 +149,7 @@ public class JSONData {
 	public static String getJSON(int pageNum) throws IOException, ParseException {
 		StringBuilder result = new StringBuilder();
 		
-		URL url = new URL("https://backend-challenge-summer-2018.herokuapp.com/challenges.json?id=1&page="+pageNum);
+		URL url = new URL("https://backend-challenge-summer-2018.herokuapp.com/challenges.json?id=2&page="+pageNum);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -135,7 +171,7 @@ public class JSONData {
 	//Iterate through API to get all the pages
 	public static String getFullJSON() throws IOException, ParseException {
 		String fullJSON =  "";
-		for (int i=1; i<4; i++) {
+		for (int i=1; i<6; i++) {
 			fullJSON+=getJSON(i);
 		}
 		fullJSON = fullJSON.replace("][", ",");
