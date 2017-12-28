@@ -96,72 +96,44 @@ public class JSONData {
 			}
 		}
 		changeRootBoolean();
-		createReturnJson(loopControl, jsonArrayFull).toString();
-		
-//		System.out.println(loopControl.toString());
-//		System.out.println(createReturnJson(loopControl, jsonArrayFull).toString());
+		System.out.println(createReturnJson(loopControl, jsonArrayFull).toString());
 	}
 	
-	
-	public static JSONArray createReturnJson(List<Boolean> bools, JSONArray jsonArray) {
-//		ArrayList<Map<String, String>> toReturnArrayValid = new ArrayList<>();
-//		ArrayList<Map<String, String>> toReturnArrayInValid = new ArrayList<>();
-		JsonArray toReturnArrayValidJson = new JsonArray();
-		JsonArray toReturnArrayInValidJson = new JsonArray();
+	@SuppressWarnings("unchecked")
+	public static JSONObject createReturnJson(List<Boolean> bools, JSONArray jsonArray) {
+		JSONArray toReturnArrayValidJSON = new JSONArray();
+		JSONArray toReturnArrayInValidJSON = new JSONArray();
+				
 		for(int i=0; i<jsonArray.size(); i++) {
-//			Map<String, String> toReturnJSON =  new HashMap<String, String>();
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
 			
 			if (jsonObject.get("parent_id")==null) {
-				JsonObject testing = new JsonObject();
-				testing.addProperty("children", getChildrenArray(Integer.valueOf(jsonObject.get("id").toString())));
-				testing.addProperty("root_id", jsonObject.get("id").toString());
-//				toReturnJSON.put("children", getChildrenArray(Integer.valueOf(jsonObject.get("id").toString())));
-//				toReturnJSON.put("root_id", jsonObject.get("id").toString());
+				JSONObject newMenuItem = new JSONObject();
 				
-				
+				newMenuItem.put("root_id", jsonObject.get("id"));
+				newMenuItem.put("children", getChildrenArray(Integer.valueOf(jsonObject.get("id").toString())));
+
 				if(bools.get(i)==false) {
-						
-//					JSONObject jsonCastedO = new JSONObject(toReturnJSON);
-					toReturnArrayValidJson.add(testing);
-//					toReturnArrayValid.add(toReturnJSON);
-//					System.out.println(toReturnJSON.toString());
-//					System.out.println("TESTING: " + toReturnArrayValidJson.toString());
-					
-				} else {
-//					toReturnArrayInValid.add(toReturnJSON);	
-					toReturnArrayInValidJson.add(testing);
-					
+					toReturnArrayValidJSON.add(newMenuItem);
+				} else {	
+					toReturnArrayInValidJSON.add(newMenuItem);
 				}
 			}
-			
 		}
-		
-//		String gsonValid = new Gson().toJson(toReturnArrayValid);
-//		String gsonInValid = new Gson().toJson(toReturnArrayInValid);
-//		Gson gsonFull = new Gson();
-		Map<String, JsonArray> jsonFull = new HashMap<String, JsonArray>();
-		jsonFull.put("invalid_menus", toReturnArrayValidJson);
-		jsonFull.put("valid_menus", toReturnArrayInValidJson);
-		
-		
-		JSONObject jsonFullCasted = new JSONObject(jsonFull);
-		
-		
-		
-//		System.out.println("GSON Valid: " + gsonValid);
-//		System.out.println("GSON Invalid: " + gsonInValid);
-//		JSONArray castedArray = new JSONArray(toReturnArray);
-		System.out.println("CASTED: " + jsonFullCasted.toString());
-		return new JSONArray();
+		Map<String, JSONArray> JSONFull = new HashMap<String, JSONArray>();
+		JSONFull.put("valid_menus", toReturnArrayValidJSON);
+		JSONFull.put("invalid_menus", toReturnArrayInValidJSON);
+		JSONObject JSONFullCasted = new JSONObject(JSONFull);
+
+		return JSONFullCasted;
 		
 	}
 	
-	public static String getChildrenArray(int id) {
+	public static JSONArray getChildrenArray(int id) {
 		
-		return "[]";
-		
+		return new JSONArray();
 	}
+	
 	public static boolean findLoopButtomUp(int index) {
 		JSONObject jsonObject = (JSONObject) jsonArrayFull.get(index);
 		int[] child_ids_int = JSONArraytoIntArray((JSONArray)jsonObject.get("child_ids"));
