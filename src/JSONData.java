@@ -23,7 +23,6 @@ public class JSONData {
 	public static void main (String args[]) throws ParseException, IOException  {
 		JSONData = getFullJSON();
 		System.out.println(JSONData);
-//		System.out.println(((JSONArray)new JSONParser().parse(JSONData)).toString());
 		jsonArrayFull = (JSONArray)new JSONParser().parse(getFullJSON());
 		checkDependency(jsonArrayFull);
 	}
@@ -56,27 +55,16 @@ public class JSONData {
 		
 	}
 	
-	public static int checkDependency(JSONArray jsonArray) {
+	public static void checkDependency(JSONArray jsonArray) {
 		for(int i =0; i< jsonArray.size(); i++) {
-			
 			JSONObject jsonObject = (JSONObject) jsonArray.get(i);
-//			JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
-//			int[] child_ids_int = JSONArraytoIntArray(jsonA);
-			
-			int id = Integer.valueOf(jsonObject.get("id").toString());
 			
 			initializeVariables();
-//			addId(id);
-			
-			if (jsonObject.get("parent_id")==null) {
 
-			} else {
+			if (jsonObject.get("parent_id")!=null) {
 				System.out.println("Index: " + i + " " + jsonObject.get("data").toString() + " " + findLoopButtomUp(i));
 			}
-			
 		}
-		
-		return -1;
 	}
 	
 	public static boolean findLoopButtomUp(int index) {
@@ -93,36 +81,14 @@ public class JSONData {
 			if(jsonObject.get("parent_id")!=null) {
 				int parentJId = Integer.valueOf(jsonObject.get("parent_id").toString());
 				int parentIndex = findJSONObject(jsonArrayFull, parentJId);
-//				addId(parentJId);
+
 				return findLoopButtomUp(parentIndex);
 			} else {
 				return false;				
 			}
 		}
 	}
-	
-	public static boolean findLoopTopDown(int index) {
-		JSONObject jsonObject = (JSONObject) jsonArrayFull.get(index);
-		JSONArray jsonA = (JSONArray) jsonObject.get("child_ids");
-		if (menuDepth>4||parent_ids.contains(jsonObject.get("id"))) {
-			return true;
-		} else {
-			if (jsonA!=null) {
-				int [] child_ids_int = JSONArraytoIntArray(jsonA);
-				for(int i=0; i<child_ids_int.length; i++) {
-					System.out.println(child_ids_int[i]);
-//					System.out.println(findLoop(findJSONObject(jsonArrayFull, child_ids_int[i])));
-					addId(child_ids_int[i]);
-					return findLoopTopDown(findJSONObject(jsonArrayFull, child_ids_int[i]));
-				}
-			} else {
-				return false;
-			}
-		}
-		return false;
-	}
-	
-	
+		
 	//Use to convert the child_ids value into a int[] array.
 	public static int[] JSONArraytoIntArray(JSONArray jsonArray) {
 		int[] toReturn = new int[jsonArray.size()];
@@ -130,7 +96,6 @@ public class JSONData {
 			toReturn[i]= Integer.valueOf(jsonArray.get(i).toString());
 		}
 		return toReturn;
-		
 	}
 	
 	//Returns index where JSONObject is located in the array if it exists, -1 if it doesnt exist.
@@ -161,7 +126,6 @@ public class JSONData {
 		JSONObject json = (JSONObject)jsonParser.parse(result.toString());
 		
 		JSONArray menuArray = (JSONArray) json.get("menus");
-//		System.out.println(menuArray.toString());
 		
 		rd.close();	
 
