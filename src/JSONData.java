@@ -26,10 +26,12 @@ public class JSONData {
 	static List<Boolean> loopControl = new ArrayList<>();
 	static int menuDepth;
 	static JSONArray childrenArray;
+	static int childDepth;
 	
 	public JSONData()  {		}
 	
 	public static void initializeChildrenArray() {
+		childDepth = 0;
 		childrenArray = new JSONArray();
 	}
 	
@@ -37,6 +39,7 @@ public class JSONData {
 	public static void addChild(int id) {
 		childrenArray.add(id);
 	}
+	
 	public static void main (String args[]) throws ParseException, IOException  {
 		JSONData = getFullJSON();
 		System.out.println(JSONData);
@@ -122,7 +125,7 @@ public class JSONData {
 				newMenuItem.put("root_id", jsonObject.get("id"));
 				initializeChildrenArray();
 				getChildrenArray(Integer.valueOf(jsonObject.get("id").toString()));
-				System.out.println(childrenArray.toString());
+				
 				newMenuItem.put("children", childrenArray);
 
 				if(bools.get(i)==false) {
@@ -144,27 +147,20 @@ public class JSONData {
 	public static void getChildrenArray(int id) {
 		JSONObject jsonObject = (JSONObject)jsonArrayFull.get(findJSONObject(jsonArrayFull, id));
 		JSONArray jsonArrayChild = (JSONArray)jsonObject.get("child_ids");
-//		JSONArray jsonArrayParent = (JSONArray) jsonObject.get("parent_id");
-//		int[] parent_id = JSONArraytoIntArray(jsonArrayParent);
 		
 		int[] children_ids = JSONArraytoIntArray(jsonArrayChild);
-		System.out.println("NEW ITERATION");
-		System.out.println(Arrays.toString(children_ids));
-		System.out.println(id);
-		System.out.println(jsonObject.get("parent_id")==null);
-		if (children_ids.length==0 || (jsonObject.get("parent_id")==null && childrenArray.size()>0)) {	
+		
+		if (children_ids.length==0 || childDepth>4 ||(jsonObject.get("parent_id")==null && childrenArray.size()>0)) {	
 			addChild(id);
 		
 		} else {
-//			System.out.println(id);
 			for(int i=0; i<children_ids.length;i++) {
-//				System.out.println(children_ids[i]);
+				childDepth++;
 				getChildrenArray(children_ids[i]);
 			}
 			if(jsonObject.get("parent_id")!=null) {
 				addChild(id);	
 			}
-			
 		}
 	}
 	
@@ -215,7 +211,7 @@ public class JSONData {
 	public static String getJSON(int pageNum) throws IOException, ParseException {
 		StringBuilder result = new StringBuilder();
 		
-		URL url = new URL("https://backend-challenge-summer-2018.herokuapp.com/challenges.json?id=2&page="+pageNum);
+		URL url = new URL("https://backend-challenge-summer-2018.herokuapp.com/challenges.json?id=1&page="+pageNum);
 		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 		connection.setRequestMethod("GET");
 		BufferedReader rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
