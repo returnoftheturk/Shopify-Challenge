@@ -25,9 +25,18 @@ public class JSONData {
 	static List<Integer> parent_ids;
 	static List<Boolean> loopControl = new ArrayList<>();
 	static int menuDepth;
+	static JSONArray childrenArray;
 	
 	public JSONData()  {		}
 	
+	public static void initializeChildrenArray() {
+		childrenArray = new JSONArray();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static void addChild(int id) {
+		childrenArray.add(id);
+	}
 	public static void main (String args[]) throws ParseException, IOException  {
 		JSONData = getFullJSON();
 		System.out.println(JSONData);
@@ -111,7 +120,10 @@ public class JSONData {
 				JSONObject newMenuItem = new JSONObject();
 				
 				newMenuItem.put("root_id", jsonObject.get("id"));
-				newMenuItem.put("children", getChildrenArray(Integer.valueOf(jsonObject.get("id").toString())));
+				initializeChildrenArray();
+				getChildrenArray(Integer.valueOf(jsonObject.get("id").toString()));
+				System.out.println(childrenArray.toString());
+				newMenuItem.put("children", childrenArray);
 
 				if(bools.get(i)==false) {
 					toReturnArrayValidJSON.add(newMenuItem);
@@ -129,9 +141,31 @@ public class JSONData {
 		
 	}
 	
-	public static JSONArray getChildrenArray(int id) {
+	public static void getChildrenArray(int id) {
+		JSONObject jsonObject = (JSONObject)jsonArrayFull.get(findJSONObject(jsonArrayFull, id));
+		JSONArray jsonArrayChild = (JSONArray)jsonObject.get("child_ids");
+//		JSONArray jsonArrayParent = (JSONArray) jsonObject.get("parent_id");
+//		int[] parent_id = JSONArraytoIntArray(jsonArrayParent);
 		
-		return new JSONArray();
+		int[] children_ids = JSONArraytoIntArray(jsonArrayChild);
+		System.out.println("NEW ITERATION");
+		System.out.println(Arrays.toString(children_ids));
+		System.out.println(id);
+		System.out.println(jsonObject.get("parent_id")==null);
+		if (children_ids.length==0 || (jsonObject.get("parent_id")==null && childrenArray.size()>0)) {	
+			addChild(id);
+		
+		} else {
+//			System.out.println(id);
+			for(int i=0; i<children_ids.length;i++) {
+//				System.out.println(children_ids[i]);
+				getChildrenArray(children_ids[i]);
+			}
+			if(jsonObject.get("parent_id")!=null) {
+				addChild(id);	
+			}
+			
+		}
 	}
 	
 	public static boolean findLoopButtomUp(int index) {
