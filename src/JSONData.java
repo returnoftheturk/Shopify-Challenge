@@ -1,6 +1,7 @@
 /*AUTHOR: AHMET AKGUL
  * 12/30/2017
  * SHOPIFY-CHALLENGE
+ * NOTE:  GITHUB REPOSITORY IS LOCATED AT https://github.com/returnoftheturk/Shopify-Challenge.git
  */
 
 import java.io.BufferedReader;
